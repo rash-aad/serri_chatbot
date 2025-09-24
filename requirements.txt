@@ -1,0 +1,8 @@
+# requirements.txt
+pymupdf
+sentence-transformers
+numpy
+flask
+chromadb
+cohere
+python-dotenv

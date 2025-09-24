@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serri Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>Serri AI Bot</h2>
+        </div>
+        <div class="chat-box" id="chat-box">
+            </div>
+        <form class="chat-input-form" id="chat-form">
+            <input type="text" id="user-input" placeholder="Type your message here..." autocomplete="off">
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script>
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const chatBox = document.getElementById('chat-box');
+
+        // Generate a unique user ID for this chat session
+        const userId = 'user-' + Math.random().toString(36).substring(2, 9);
+
+        // Function to send a message and get the first response
+        async function startConversation() {
+            // Send an initial "Hi" to get the welcome menu
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, message: 'Hi' })
+            });
+            const data = await response.json();
+            appendMessage(data.response, 'bot-message');
+        }
+
+        chatForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const userMessage = userInput.value.trim();
+            if (userMessage === '') return;
+
+            appendMessage(userMessage, 'user-message');
+            userInput.value = '';
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, message: userMessage })
+                });
+
+                const data = await response.json();
+                appendMessage(data.response, 'bot-message');
+            } catch (error) {
+                console.error('Error:', error);
+                appendMessage('Sorry, something went wrong. Please try again.', 'bot-message');
+            }
+        });
+
+        function appendMessage(message, className) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', className);
+            
+            const p = document.createElement('p');
+            // Use innerHTML to render newlines from the bot's menu
+            p.innerHTML = message.replace(/\n/g, '<br>');
+            messageElement.appendChild(p);
+            
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Start the conversation when the page loads
+        window.onload = startConversation;
+    </script>
+</body>
+</html>
