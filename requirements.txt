@@ -1,8 +1,9 @@
 # requirements.txt
-pymupdf
+flask
+cohere
+chromadb
 sentence-transformers
 numpy
-flask
-chromadb
-cohere
+gunicorn
+PyMuPDF
 python-dotenv
